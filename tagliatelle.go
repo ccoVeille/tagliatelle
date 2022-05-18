@@ -12,6 +12,7 @@ import (
 	"github.com/ettle/strcase"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
+	"golang.org/x/tools/go/analysis/passes/structtag"
 	"golang.org/x/tools/go/ast/inspector"
 )
 
@@ -27,6 +28,11 @@ func New(config Config) *analysis.Analyzer {
 		Name: "tagliatelle",
 		Doc:  "Checks the struct tags.",
 		Run: func(pass *analysis.Pass) (interface{}, error) {
+			// uncomment structAnalyser.Run to fix the issue
+			// but we shouldn't call it here, as structtag.Analyzer is in the Requires
+			// I checked Requires was run and found the issue, the issue is simply not reported
+			//_, _ = structtag.Analyzer.Run(pass)
+
 			if len(config.Rules) == 0 {
 				return nil, nil
 			}
@@ -34,6 +40,7 @@ func New(config Config) *analysis.Analyzer {
 			return run(pass, config)
 		},
 		Requires: []*analysis.Analyzer{
+			structtag.Analyzer,
 			inspect.Analyzer,
 		},
 	}
